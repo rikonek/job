@@ -7,4 +7,6 @@
 #define W1_SENSOR_VALUE_1 "/sys/bus/w1/drivers/w1_slave_driver/"
 #define W1_SENSOR_VALUE_2 "/w1_slave"
 
+#define LCD_DEV "/dev/klcd"
+
 #endif
