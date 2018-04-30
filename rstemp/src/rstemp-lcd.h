@@ -26,9 +26,9 @@ struct ioctl_mesg{
 // ******************* PROTOTYPE *******************
 
 int lcdInit();
-void lcdDeInit(int);
-void lcdClear(int);
-void lcdPrint(int, unsigned int, unsigned int, char []);
-void lcdCursorOff(int);
+void lcdDeInit(const int);
+void lcdClear(const int);
+void lcdPrint(const int, const unsigned int, const unsigned int, const char []);
+void lcdCursorOff(const int);
 
 #endif

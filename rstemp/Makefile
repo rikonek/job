@@ -4,7 +4,7 @@ include $(TOPDIR)/rules.mk
 # The name and version of your package are used to define the variable to point to the build directory of your package: $(PKG_BUILD_DIR)
 PKG_NAME:=rstemp
 PKG_VERSION:=1.0
-PKG_RELEASE:=22
+PKG_RELEASE:=1
 
 # Source settings (i.e. where to find the source codes)
 # This is a custom variable, used below
@@ -35,9 +35,10 @@ endef
 # Package build instructions; invoke the target-specific compiler to first compile the source file, and then to link the file into the final executable
 define Build/Compile
 	$(TARGET_CC) $(TARGET_CFLAGS) -o $(PKG_BUILD_DIR)/rstemp.o -c $(PKG_BUILD_DIR)/rstemp.c
+	$(TARGET_CC) $(TARGET_CFLAGS) -o $(PKG_BUILD_DIR)/rstemp-func.o -c $(PKG_BUILD_DIR)/rstemp-func.c
 	$(TARGET_CC) $(TARGET_CFLAGS) -o $(PKG_BUILD_DIR)/rstemp-w1.o -c $(PKG_BUILD_DIR)/rstemp-w1.c
 	$(TARGET_CC) $(TARGET_CFLAGS) -o $(PKG_BUILD_DIR)/rstemp-lcd.o -c $(PKG_BUILD_DIR)/rstemp-lcd.c
-	$(TARGET_CC) $(TARGET_LDFLAGS) -o $(PKG_BUILD_DIR)/$1 $(PKG_BUILD_DIR)/rstemp.o $(PKG_BUILD_DIR)/rstemp-w1.o $(PKG_BUILD_DIR)/rstemp-lcd.o
+	$(TARGET_CC) $(TARGET_LDFLAGS) -o $(PKG_BUILD_DIR)/$1 $(PKG_BUILD_DIR)/rstemp.o $(PKG_BUILD_DIR)/rstemp-func.o $(PKG_BUILD_DIR)/rstemp-w1.o $(PKG_BUILD_DIR)/rstemp-lcd.o
 endef
 
 # Package install instructions; create a directory inside the package to hold our executable, and then copy the executable we built previously into the folder

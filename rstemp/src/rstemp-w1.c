@@ -5,22 +5,32 @@
 #include "rstemp-w1.h"
 #include "config.h"
 
+void w1SetGpio(const unsigned int pin)
+{
+    FILE *cmd;
+    char *pTxt=NULL;
+    asprintf(&pTxt, "insmod w1-gpio-custom bus0=0,%d,0", pin);
+    cmd=popen(pTxt, "r");
+    pclose(cmd);
+    free(pTxt);
+}
+
 unsigned int w1CountDevices()
 {
+    unsigned int number_devices=0;
     FILE *fp;
     fp = fopen(W1_COUNT, "r");
-    unsigned int count=0;
 
     if(fp == NULL)
     {
         perror("Error: w1CountDevices");
-        return 0;
     }
     else
     {
-        fscanf(fp, "%d", &count);
-        return count;
+        fscanf(fp, "%d", &number_devices);
+        fclose(fp);
     }
+    return number_devices;
 }
 
 void w1ReadSensorID(char **sensors)
@@ -42,23 +52,26 @@ void w1ReadSensorID(char **sensors)
             strcpy(sensors[i], line);
             i++;
         }
+        fclose(fp);
     }
-    fclose(fp);
 }
 
 int w1ReadTemperature(const char *sensor)
 {
-    char *url=calloc(200, sizeof(char));
-    strcat(url, W1_SENSOR_VALUE_1);
-    strcat(url, sensor);
-    strcat(url, W1_SENSOR_VALUE_2);
+    // char *url=calloc(200, sizeof(char));
+    // strcat(url, W1_SENSOR_VALUE_1);
+    // strcat(url, sensor);
+    // strcat(url, W1_SENSOR_VALUE_2);
 
     FILE *fp;
+    char *url=NULL;
+    asprintf(&url, "%s%s%s", W1_SENSOR_VALUE_1, sensor, W1_SENSOR_VALUE_2);
+
     fp = fopen(url, "r");
     free(url);
 
     char line[16];
-    int temp=0;
+    int temperature=0;
 
     if(fp == NULL)
     {
@@ -68,13 +81,13 @@ int w1ReadTemperature(const char *sensor)
     {
         while(fscanf(fp, "%s", line) == 1)
         {
-            // printf("Line: %s\n", line);
+            // empty, because I need last line
         }
-        if(strstr(line, "t="))
+        if(strstr(line, TEMPERATURE_PARSE_STRING)) // I need last line in format "t=23674"
         {
-            temp=atoi(line+2);
+            temperature=atoi(line+2); // move start index from 0 to 2 (remove "t=")
         }
+        fclose(fp);
     }
-    fclose(fp);
-    return temp;
+    return temperature;
 }

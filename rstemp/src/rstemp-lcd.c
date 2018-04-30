@@ -18,14 +18,14 @@ int lcdInit()
     return lcd;
 }
 
-void lcdDeInit(int lcd_fd)
+void lcdDeInit(const int lcd_fd)
 {
     if(lcd_fd < 0) return;
     
     close(lcd_fd);
 }
 
-void lcdClear(int lcd_fd)
+void lcdClear(const int lcd_fd)
 {
     if(lcd_fd < 0) return;
 
@@ -37,7 +37,7 @@ void lcdClear(int lcd_fd)
     }
 }
 
-void lcdPrint(int lcd_fd, unsigned int line, unsigned int position, char txt[])
+void lcdPrint(const int lcd_fd, const unsigned int line, const unsigned int position, const char txt[])
 {
     if(lcd_fd < 0) return;
 
@@ -53,9 +53,10 @@ void lcdPrint(int lcd_fd, unsigned int line, unsigned int position, char txt[])
     {
         perror("Error: lcdPrint");
     }
+    usleep(100000); // I need this to slow sending instruction. Too many instruction without usleep gives a strange signs.
 }
 
-void lcdCursorOff(int lcd_fd)
+void lcdCursorOff(const int lcd_fd)
 {
     if(lcd_fd < 0) return;
 
