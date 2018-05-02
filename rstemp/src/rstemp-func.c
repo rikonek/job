@@ -27,12 +27,12 @@ void printHelp(const char *name)
     printf("\t-w, --w1=[gpio pin]\n\t\tInitialize w1 on gpio pin.\n\n");
 }
 
-void setConfigClearLCD(struct config *cfg, bool flag)
+void setConfigClearLCD(config_t *cfg, bool flag)
 {
     cfg->clear_lcd=flag;
 }
 
-void setConfigRepeat(struct config *cfg, int n)
+void setConfigRepeat(config_t *cfg, int n)
 {
     if(n<0)
     {
@@ -41,7 +41,7 @@ void setConfigRepeat(struct config *cfg, int n)
     cfg->repeat=n;
 }
 
-void setConfigSleepTime(struct config *cfg, int time)
+void setConfigSleepTime(config_t *cfg, int time)
 {
     if(time<MIN_SLEEP_TIME)
     {
@@ -55,7 +55,7 @@ void setConfigSleepTime(struct config *cfg, int time)
     cfg->sleep_time=time;
 }
 
-int parseCmdOption(int argc, char *argv[], struct config *cfg)
+int parseCmdOption(int argc, char *argv[], config_t *cfg)
 {
     static struct option long_options[] = {
         {"clear", no_argument,       0, 'c' },
@@ -101,7 +101,7 @@ int parseCmdOption(int argc, char *argv[], struct config *cfg)
     return 1;
 }
 
-void run(const struct config *cfg)
+void run(const config_t *cfg)
 {
     const unsigned int w1count = w1CountDevices();
     printf("Found devices: %d\n", w1count);

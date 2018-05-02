@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[])
 {
-    struct config cfg = { MIN_SLEEP_TIME, DEFAULT_REPEAT, DEFAULT_CLEAR_LCD };
+    config_t cfg = { MIN_SLEEP_TIME, DEFAULT_REPEAT, DEFAULT_CLEAR_LCD };
 
     if(parseCmdOption(argc, argv, &cfg) == 0) return 0;
 
