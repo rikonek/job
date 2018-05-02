@@ -1,0 +1,68 @@
+===== 1-wire =====
+
+OpenWRT wymaga zainstalowania pakietów do obsługi 1-wire, które można pobrać ze strony <code>https://downloads.openwrt.org/releases/17.01.4/targets/omap/generic/packages</code>
+  * kmod-w1
+  * kmod-w1-master-gpio
+  * kmod-w1-gpio-custom
+  * kmod-w1-slave-therm
+
+Zainstalować za pomocą polecenia <code>opkg install kmod-w1*</code>
+
+Sprawdzić czy w systemie widoczna jest magistrala 1-wire <code>dmesg | grep wire</code>
+Zainicjalizować port GPIO_45 (lub inny) <code>insmod w1-gpio-custom bus0=0,45,0</code>
+Sprawdzić czy nie ma błędów <code>dmesq | grep w1
+cat /sys/kernel/debug/gpio</code>
+Odczytać wartości z urządzeń 1-wire można poprzez <code>cat /sys/bus/w1/drivers/w1_slave_driver/*/w1_slave</code>
+
+W przypadku Beaglebone Black przy inicjalizacji 1-wire pojawiają się błędy:
+  * w1-gpio w1-gpio.0: Failed to parse gpio property for data pin (-2)
+  * w1-gpio: probe of w1-gpio.0 failed with error -2
+
+Rozwiązaniem na to jest skompilowanie OpenWRT ze źródeł i modyfikacja plików sterownika w kernelu.
+
+
+
+==== Patch 1-wire dla OpenWRT ====
+
+W folderze ze źródłami OpenWRT znaleźć plik:
+<code>find . -name "w1-gpio.c"</code>
+
+W rezultacie otrzymujemy następujące lokalizacje:
+<code>./build_dir/target-arm_cortex-a9+vfpv3_musl-1.1.16_eabi/linux-omap/linux-4.4.92/drivers/w1/masters/w1-gpio.c
+./build_dir/toolchain-arm_cortex-a9+vfpv3_gcc-5.4.0_musl-1.1.16_eabi/linux-4.4.92/drivers/w1/masters/w1-gpio.c</code>
+
+Zmodyfikować:
+<code>static int w1_gpio_probe_dt(struct platform_device *pdev)
+{
+        struct w1_gpio_platform_data *pdata = dev_get_platdata(&pdev->dev);
+        struct device_node *np = pdev->dev.of_node;
+        int gpio;
+
+        pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+        if (!pdata)
+                return -ENOMEM;
+
+        if (of_get_property(np, "linux,open-drain", NULL))
+                pdata->is_open_drain = 1;
+++if (pdev->dev.of_node) {        /*(Virtual) of_node can be absent*/
+        gpio = of_get_gpio(np, 0);
+        if (gpio < 0) {
+                if (gpio != -EPROBE_DEFER)
+                        dev_err(&pdev->dev,
+                                        "Failed to parse gpio property for data pin (%d)\n",
+                                        gpio);
+
+                return gpio;
+        }
+        pdata->pin = gpio;
+
+        gpio = of_get_gpio(np, 1);
+        if (gpio == -EPROBE_DEFER)
+                return gpio;
+        /* ignore other errors as the pullup gpio is optional */
+        pdata->ext_pullup_enable_pin = gpio;
+
+        pdev->dev.platform_data = pdata;
+++}
+        return 0;
+}</code>
