@@ -8,7 +8,6 @@
 // #include <fcntl.h>
 // #include <sys/stat.h>
 
-void displayBits(unsigned int);
 // long int receive();
 // void send(const unsigned int);
 unsigned int transform(unsigned int);
