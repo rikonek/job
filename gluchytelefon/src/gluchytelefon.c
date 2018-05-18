@@ -9,6 +9,25 @@ bool checkRange(const long int number)
     return true;
 }
 
+void displayBits(unsigned int number)
+{
+    unsigned int size=sizeof(number)*8;
+    unsigned mask = 1 << (size-1);
+
+    printf("%10u = ", number);
+
+    for(unsigned int i=1; i<=size; i++)
+    {
+        putchar(number & mask ? '1' : '0');
+        number <<= 1;
+        if(i%8==0)
+        {
+            putchar(' ');
+        }
+    }
+    putchar('\n');
+}
+
 void displayInfo(infoType type, char txt[])
 {
     switch(type)

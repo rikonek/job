@@ -22,6 +22,7 @@
 typedef enum infoType { ERROR, INPUT, INTRO, OK, OUTPUT } infoType;
 
 bool checkRange(const long int);
+void displayBits(unsigned int);
 void displayInfo(infoType, char []);
 
 #endif

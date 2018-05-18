@@ -10,7 +10,6 @@
 #include <sys/stat.h>
 #include <string.h>
 
-void displayBits(unsigned int);
 long int parseCmdOption(int, char *[]);
 void send(const unsigned int);
 unsigned int transform(unsigned int);
