@@ -1,4 +1,9 @@
-test/
-*.o
-*.out
 .vscode
+test/
+*.cmd
+*.ko
+*.o
+*.order
+*.out
+*.symvers
+*.tmp*
