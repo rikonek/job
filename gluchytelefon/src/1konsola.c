@@ -47,11 +47,6 @@ int main()
     return 0;
 }
 
-void run()
-{
-
-}
-
 void breakHandler()
 {
     printf("\nShutting down...\n");
