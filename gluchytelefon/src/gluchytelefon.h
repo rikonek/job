@@ -19,10 +19,17 @@
 #define TXT_ERROR_INPUT_OUT_OF_RANGE "Input is out of range"
 #define TXT_ERROR_OUTPUT_OUT_OF_RANGE "Output is out of range"
 
-typedef enum infoType { ERROR, INPUT, INTRO, OK, OUTPUT } infoType;
+typedef enum infoType
+{
+    ERROR,
+    INPUT,
+    INTRO,
+    OK,
+    OUTPUT
+} infoType;
 
 bool checkRange(const long int);
 void displayBits(unsigned int);
-void displayInfo(infoType, char []);
+void displayInfo(infoType, char[]);
 
 #endif

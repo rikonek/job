@@ -13,12 +13,11 @@ MODULE_DESCRIPTION("Linux Kernel Module over chrdev.");
 MODULE_VERSION("1.0");
 
 static int majorNumber;
-static char message[BUFFER_SIZE]={0};
-static struct class* jajkoCharClass=NULL;
-static struct device* jajkoCharDevice=NULL;
+static char message[BUFFER_SIZE] = {0};
+static struct class *jajkoCharClass = NULL;
+static struct device *jajkoCharDevice = NULL;
 
-static struct file_operations fops =
-{
+static struct file_operations fops = {
     .read = dev_read,
     .write = dev_write,
 };
@@ -29,7 +28,7 @@ static int __init jajko_init(void)
 
     // Try to dynamically allocate a major number for the device
     majorNumber = register_chrdev(0, DEVICE_NAME, &fops);
-    if(majorNumber<0)
+    if (majorNumber < 0)
     {
         printk(KERN_ALERT "JAJKO: Failed to register a major number\n");
         return majorNumber;
@@ -38,7 +37,7 @@ static int __init jajko_init(void)
 
     // Register the device class
     jajkoCharClass = class_create(THIS_MODULE, CLASS_NAME);
-    if(IS_ERR(jajkoCharClass))
+    if (IS_ERR(jajkoCharClass))
     {
         unregister_chrdev(majorNumber, DEVICE_NAME);
         printk(KERN_ALERT "JAJKO: Failed to register device class\n");
@@ -48,7 +47,7 @@ static int __init jajko_init(void)
 
     // Register the device driver
     jajkoCharDevice = device_create(jajkoCharClass, NULL, MKDEV(majorNumber, 0), NULL, DEVICE_NAME);
-    if(IS_ERR(jajkoCharDevice))
+    if (IS_ERR(jajkoCharDevice))
     {
         class_destroy(jajkoCharClass);
         unregister_chrdev(majorNumber, DEVICE_NAME);
