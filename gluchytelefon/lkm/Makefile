@@ -1,7 +1,17 @@
 obj-m+=jajko.o
 
-all:
-	make -C /lib/modules/$(shell uname -r)/build/ M=$(PWD) modules
+KERNEL_DIR=/lib/modules/$(shell uname -r)/build
+
+all: uninstall build install
+
+build:
+	$(MAKE) -C $(KERNEL_DIR) M=$(PWD) modules
 
 clean:
-	make -C /lib/modules/$(shell uname -r)/build/ M=$(PWD) clean
+	$(MAKE) -C $(KERNEL_DIR) M=$(PWD) clean
+
+install:
+	-sudo insmod jajko.ko
+
+uninstall:
+	-sudo rmmod jajko
