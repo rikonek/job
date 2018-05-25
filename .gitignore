@@ -2,6 +2,7 @@
 test/
 *.cmd
 *.ko
+*.mod.c
 *.o
 *.order
 *.out
