@@ -1,5 +1,6 @@
 #include "gluchytelefon.h"
 #include "5netlink.h"
+#include "genl.h"
 
 // 5. "Netlink"
 // Wejście: Generic netlink
@@ -34,6 +35,27 @@ int main()
 
     // send(reverse);
     return 0;
+}
+
+long int receive()
+{
+    // int fd;
+    // char buffer[sizeof(int) * 8];
+    // fd = open(CHRDEV_PATH, O_RDONLY);
+    // if (fd < 0)
+    // {
+    //     perror("Failed to open the device CHRDEV");
+    //     exit(0);
+    // }
+    // if (read(fd, buffer, sizeof(int) * 8) < 0)
+    // {
+    //     perror("Couldn't read from CHRDEV");
+    //     exit(0);
+    // }
+    // close(fd);
+
+    return 1;
+    // return atol(buffer);
 }
 
 unsigned int transform(unsigned int number) // 32 bit reverse

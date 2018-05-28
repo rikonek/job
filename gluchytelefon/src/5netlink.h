@@ -8,7 +8,7 @@
 // #include <fcntl.h>
 // #include <sys/stat.h>
 
-// long int receive();
+long int receive();
 // void send(const unsigned int);
 unsigned int transform(unsigned int);
 

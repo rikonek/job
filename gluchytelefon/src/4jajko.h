@@ -7,7 +7,7 @@
 #include <fcntl.h>
 
 long int receive();
-void send(const unsigned int);
+void gt_send(const unsigned int);
 long int transform(const long int);
 
 #endif

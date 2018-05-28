@@ -1,5 +1,6 @@
 #include "gluchytelefon.h"
 #include "4jajko.h"
+#include "genl.h"
 
 // 4. "Jajko"
 // Wejście: interfejs znakowy (linux kernel module over chrdev)
@@ -28,7 +29,7 @@ int main()
     sprintf(buffer, "%ld", number);
     displayInfo(OUTPUT, buffer);
 
-    send(number);
+    gt_send(number);
     return 0;
 }
 
@@ -52,9 +53,29 @@ long int receive()
     return atol(buffer);
 }
 
-void send(const unsigned int number)
+void gt_send(const unsigned int number)
 {
-    // In progress...
+    pid_t pid;
+    if ((pid = fork()) == -1)
+    {
+        perror("Fork error");
+        exit(0);
+    }
+    else
+    {
+        if (pid == 0)
+        {
+            execl("./5netlink.out", "software", NULL);
+        }
+    }
+
+    struct nl_sock *nlsock = NULL;
+    gt_genl_prep_sock(&nlsock);
+
+    char *message = NULL;
+    asprintf(&message, "%i", number);
+    gt_genl_send_msg(nlsock, message);
+    free(message);
 }
 
 long int transform(const long int number)
