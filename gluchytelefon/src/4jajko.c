@@ -65,17 +65,19 @@ void gt_send(const unsigned int number)
     {
         if (pid == 0)
         {
-            execl("./5netlink.out", "software", NULL);
+            usleep(10000); // waiting for next step process
+            struct nl_sock *nlsock = NULL;
+            gt_genl_prep_sock(&nlsock);
+
+            char *message = NULL;
+            asprintf(&message, "%u", number);
+            gt_genl_send_msg(nlsock, message);
+            free(message);
+            exit(0);
         }
     }
 
-    struct nl_sock *nlsock = NULL;
-    gt_genl_prep_sock(&nlsock);
-
-    char *message = NULL;
-    asprintf(&message, "%i", number);
-    gt_genl_send_msg(nlsock, message);
-    free(message);
+    execl("./5netlink.out", "software", NULL);
 }
 
 long int transform(const long int number)

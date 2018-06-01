@@ -4,7 +4,7 @@
 #define GT_GENL_FAMILY_NAME "gt_genetlink"
 #define GT_GENL_MCGRP0_NAME "gt_genl_mcgrp0"
 
-#define GT_GENL_MSG_SIZE 32
+#define GT_GENL_MSG_SIZE 10
 
 enum
 {
@@ -30,7 +30,7 @@ enum gt_genl_attrs
 struct nla_policy gt_genl_policy[GT_GENL_ATTR_MAX + 1] = {
     [GT_GENL_ATTR_MSG] = {
         .type = NLA_STRING,
-        .len = GT_GENL_MSG_SIZE},
+        .len = GT_GENL_MSG_SIZE + 1},
 };
 
 #endif

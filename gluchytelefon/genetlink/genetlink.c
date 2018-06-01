@@ -15,7 +15,7 @@ static void forward_msg(unsigned int group, char *message)
 {
     void *hdr;
     int res, flags = GFP_ATOMIC;
-    char msg[GT_GENL_MSG_SIZE];
+    char msg[GT_GENL_MSG_SIZE + 1];
     struct sk_buff *skb = genlmsg_new(NLMSG_DEFAULT_SIZE, flags);
 
     strncpy(msg, message, GT_GENL_MSG_SIZE);

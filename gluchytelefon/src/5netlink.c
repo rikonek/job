@@ -11,8 +11,7 @@ int main()
     displayInfo(INTRO, "#####     5     #####   even -> x=x/2, odd -> octet reverse (ABCD->BDAC)");
     char buffer[BUFFER_SIZE];
 
-    // long int number=receive();
-    long int number = 2151686159;
+    long int number = receive();
     if (!checkRange(number))
     {
         displayInfo(ERROR, TXT_ERROR_INPUT_OUT_OF_RANGE);
@@ -39,23 +38,21 @@ int main()
 
 long int receive()
 {
-    // int fd;
-    // char buffer[sizeof(int) * 8];
-    // fd = open(CHRDEV_PATH, O_RDONLY);
-    // if (fd < 0)
-    // {
-    //     perror("Failed to open the device CHRDEV");
-    //     exit(0);
-    // }
-    // if (read(fd, buffer, sizeof(int) * 8) < 0)
-    // {
-    //     perror("Couldn't read from CHRDEV");
-    //     exit(0);
-    // }
-    // close(fd);
+    struct nl_sock *nlsock = NULL;
+    struct nl_cb *nlcb = NULL; // callback
 
-    return 1;
-    // return atol(buffer);
+    gt_add_group(GT_GENL_MCGRP0);
+
+    gt_genl_prep_sock(&nlsock);
+
+    nlcb = nl_cb_alloc(NL_CB_DEFAULT);
+    nl_cb_set(nlcb, NL_CB_SEQ_CHECK, NL_CB_CUSTOM, gt_skip_seq_check, NULL);
+    nl_cb_set(nlcb, NL_CB_VALID, NL_CB_CUSTOM, gt_genl_receive_msg, NULL);
+
+    nl_recvmsgs(nlsock, nlcb);
+    nl_cb_put(nlcb);
+
+    return atol(gt_get_message());
 }
 
 unsigned int transform(unsigned int number) // 32 bit reverse

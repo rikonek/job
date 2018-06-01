@@ -6,7 +6,7 @@ all: gluchytelefon.o genl.o 1konsola.o 2argument.o 3pipe.o 4jajko.o 5netlink.o
 	$(cc) -o 2argument.out gluchytelefon.o 2argument.o
 	$(cc) -o 3pipe.out gluchytelefon.o 3pipe.o
 	$(cc) -o 4jajko.out gluchytelefon.o genl.o 4jajko.o $(LIB_GENL)
-	$(cc) -o 5netlink.out gluchytelefon.o 5netlink.o
+	$(cc) -o 5netlink.out gluchytelefon.o genl.o 5netlink.o $(LIB_GENL)
 
 gluchytelefon.o: gluchytelefon.c
 	$(cc) -c -std=c99 -o $@ $+

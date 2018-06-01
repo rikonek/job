@@ -1,18 +1,11 @@
-#ifndef GENL_TEST_H
-#define GENL_TEST_H
+#ifndef _GENL_H_
+#define _GENL_H_
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <ctype.h>
 #include <errno.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/time.h>
+#include <linux/netlink.h>
 #include <netlink/msg.h>
 #include <netlink/attr.h>
-
-#include <linux/netlink.h>
 #include <netlink/genl/genl.h>
 #include <netlink/genl/family.h>
 #include <netlink/genl/ctrl.h>
@@ -20,7 +13,7 @@
 #define GT_GENL_FAMILY_NAME "gt_genetlink"
 #define GT_GENL_MCGRP0_NAME "gt_genl_mcgrp0"
 
-#define GT_GENL_MSG_SIZE 32
+#define GT_GENL_MSG_SIZE 10 // 2^32 = 4.294.967.295
 
 enum
 {
@@ -52,11 +45,15 @@ enum gt_genl_attrs
 static struct nla_policy gt_genl_policy[GT_GENL_ATTR_MAX + 1] = {
     [GT_GENL_ATTR_MSG] = {
         .type = NLA_STRING,
-        .maxlen = GT_GENL_MSG_SIZE},
+        .maxlen = GT_GENL_MSG_SIZE + 1},
 };
 #endif
 
-void gt_genl_send_msg(struct nl_sock *sock, const char *message);
-void gt_genl_prep_sock(struct nl_sock **nlsock);
+char *gt_get_message();
+int gt_skip_seq_check(struct nl_msg *, void *);
+void gt_add_group(unsigned int);
+int gt_genl_receive_msg(struct nl_msg *, void *);
+void gt_genl_send_msg(struct nl_sock *, const char *);
+void gt_genl_prep_sock(struct nl_sock **);
 
 #endif
