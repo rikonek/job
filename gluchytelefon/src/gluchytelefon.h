@@ -19,6 +19,9 @@
 #define TXT_ERROR_INPUT_OUT_OF_RANGE "Input is out of range"
 #define TXT_ERROR_OUTPUT_OUT_OF_RANGE "Output is out of range"
 
+#define TCP_HOST "localhost"
+#define TCP_PORT 7777
+
 typedef enum infoType
 {
     ERROR,

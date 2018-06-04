@@ -4,7 +4,7 @@
 #define GT_GENL_FAMILY_NAME "gt_genetlink"
 #define GT_GENL_MCGRP0_NAME "gt_genl_mcgrp0"
 
-#define GT_GENL_MSG_SIZE 10
+#define GT_GENL_MSG_SIZE 11
 
 enum
 {

@@ -32,8 +32,63 @@ int main()
     sprintf(buffer, "%u", reverse);
     displayInfo(OUTPUT, buffer);
 
-    // send(reverse);
+    gt_send(reverse);
     return 0;
+}
+
+void inetServer(const unsigned int number)
+{
+    int server_fd, client_fd;
+    int backlog = 5;
+    struct sockaddr_in server_addr, client_addr;
+    char buffer[BUFFER_SIZE];
+
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(TCP_PORT); // network byte order
+
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd < 0)
+    {
+        perror("socket");
+        exit(0);
+    }
+
+    int yes = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &yes, sizeof(yes)))
+    {
+        perror("setsockopt");
+        exit(0);
+    }
+    if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
+    {
+        perror("bind");
+        exit(0);
+    }
+    if (listen(server_fd, backlog) < 0)
+    {
+        perror("listen");
+        exit(0);
+    }
+
+    socklen_t client_addr_len = sizeof(client_addr);
+    client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
+    if (client_fd < 0)
+    {
+        perror("accept");
+        exit(0);
+    }
+
+    sprintf(buffer, "%u", number);
+    if (write(client_fd, buffer, sizeof(buffer)) < 0)
+    {
+        perror("write");
+        exit(0);
+    }
+
+    close(client_fd);
+    close(server_fd);
 }
 
 long int receive()
@@ -53,6 +108,26 @@ long int receive()
     nl_cb_put(nlcb);
 
     return atol(gt_get_message());
+}
+
+void gt_send(const unsigned int number)
+{
+    pid_t pid;
+    if ((pid = fork()) == -1)
+    {
+        perror("Fork error");
+        exit(0);
+    }
+    else
+    {
+        if (pid == 0)
+        {
+            inetServer(number);
+            exit(0);
+        }
+    }
+
+    execl("./6siec.out", "software", NULL);
 }
 
 unsigned int transform(unsigned int number) // 32 bit reverse

@@ -2,14 +2,15 @@
 #define _5NETLINK_H_
 
 #include <stdio.h>
-// #include <stdlib.h>
-// #include <stdbool.h>
-// #include <unistd.h>
-// #include <fcntl.h>
-// #include <sys/stat.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
 
+void inetServer(const unsigned int);
 long int receive();
-// void send(const unsigned int);
+void gt_send(const unsigned int);
 unsigned int transform(unsigned int);
 
 #endif
