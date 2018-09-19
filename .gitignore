@@ -1,4 +1,5 @@
 .vscode
+nbproject/
 test/
 *.cmd
 *.ko
