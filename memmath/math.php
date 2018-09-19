@@ -4,10 +4,23 @@ error_reporting(E_ALL ^ E_NOTICE);
 setlocale(LC_ALL,'pl_PL.UTF-8','polish_poland.65001','polish_poland');
 date_default_timezone_set('Europe/Warsaw');
 
-$add=array(
-  array('val'=>$argv[1], 'len'=>strlen($argv[1])),
-  array('val'=>$argv[2], 'len'=>strlen($argv[2])),
-);
+$count_arg=count($argv);
+if($count_arg<3)
+{
+  echo('Usage:'."\r\n");
+  echo($argv[0].' arg1 arg2 [...]');
+  exit();
+}
+$add=array();
+for($i=0;$i<$count_arg;$i++)
+{
+  if($i==0) continue;
+  $add[]=array(
+    'val'=>$argv[$i],
+    'len'=>strlen($argv[$i]),
+  );
+}
+
 $add_str=array();
 $max_len=0;
 foreach($add AS $tmp)
