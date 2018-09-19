@@ -1,21 +1,56 @@
 <?php
 
+/**
+ * Math in memory
+ */
 class memmath
 {
+  /**
+   * Numbers to operations
+   * @var string[]
+   */
   private $numbers=array();
+  /**
+   * Max length string
+   * @var int
+   */
   private $max_len_number=0;
+  /**
+   * Additional space for sign
+   * @var int
+   */
   private $sign_space=2; // ex. '+ '
+  /**
+   * Place to keep additional math operations
+   * @var string
+   */
   private $helper='';
+  /**
+   * Result of operations
+   * @var string
+   */
   private $result='';
-  private $result_addition=2; // min 1 - space before number (extra sign for result)
+  /**
+   * Additional space for bigger math score (bigger than numbers)
+   * @var int
+   */
+  private $result_addition=2; // min 1
 
+  /**
+   * Add numbers to math operations
+   * @param int|string $num
+   */
   public function addNumber($num): void
   {
     $num=(string)((int)$num);
     $this->numbers[]=$num;
   }
 
-  public function sum()
+  /**
+   * Make sum operations and display
+   * @return bool
+   */
+  public function sum(): bool
   {
     if(!$this->checkMinNumbers()) return false;
     $this->operSum($this->numbers[0],$this->numbers[1]);
@@ -49,13 +84,21 @@ class memmath
     return true;
   }
 
-  private function reset()
+  /**
+   * Reset all variables
+   */
+  private function reset(): void
   {
     $this->max_len_number=0;
     $this->helper='';
     $this->result='';
   }
 
+  /**
+   * Set variable max_len_number
+   * @param int $num
+   * @return bool
+   */
   private function setMaxLenNumber(int $num): bool
   {
     if($num>$this->max_len_number)
@@ -66,6 +109,10 @@ class memmath
     return false;
   }
 
+  /**
+   * Checks minimum amount of numbers for operations
+   * @return bool
+   */
   private function checkMinNumbers(): bool
   {
     if(count($this->numbers)>=2)
@@ -75,6 +122,12 @@ class memmath
     return false;
   }
 
+  /**
+   * Make math sum operations
+   * @param string $arg1 Number 1
+   * @param string $arg2 Number 2
+   * @return bool
+   */
   private function operSum(string &$arg1, string &$arg2): bool
   {
     if(empty($arg1) || empty($arg2)) return false;
@@ -112,6 +165,11 @@ class memmath
     return true;
   }
 
+  /**
+   * Make an empty string
+   * @param int $num How many space
+   * @return string
+   */
   private function makeSpaceString(int $num): string
   {
     $str='';
@@ -122,6 +180,12 @@ class memmath
     return $str;
   }
 
+  /**
+   * Resize string to new length
+   * @param string $arg Source string
+   * @param int $dstlen Destination length
+   * @return string
+   */
   private function resizeString($arg, int $dstlen)
   {
     if(is_array($arg))
