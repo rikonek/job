@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-  $('body').prepend('<div style="position: fixed; z-index: 999; top: 0px; border-bottom: 1px solid #cccccc; background-color: yellow; width: 100%; padding: 7px; text-align: center;">Dzisiaj: <span id="mn_today"></span>, Pozostało pracy: <span id="mn_remaining"></span><br />Do wypracowania: <span id="mn_estimated"></span>, Wypracowane: <span id="mn_sum"></span></div>');
+  $('body').prepend('<div style="position: fixed; z-index: 999; top: 0px; border-bottom: 1px solid #cccccc; background-color: yellow; width: 100%; padding: 7px; text-align: center;">Czas pracy: <span id="mn_today"></span>, Koniec: <span id="mn_end"></span> (<span id="mn_remaining"></span>)<br />Do wypracowania: <span id="mn_estimated"></span>, Wypracowane: <span id="mn_sum"></span></div>');
 
   var today_start;
   var month_estimated=0;
@@ -8,13 +8,17 @@ $(document).ready(function() {
   
   setInterval(function() { refreshTime(); },500);
 
-  function tFormat(t)
+  function tFormat(t,sec=1)
   {
     t=t/1000;
     h=parseInt(t/3600,0);
     m=parseInt((t-(h*3600))/60);
     s=parseInt(t-(h*3600)-(m*60));
-    ti=("0"+h).slice(-2)+':'+("0"+m).slice(-2)+':'+("0"+s).slice(-2);
+    ti=("0"+h).slice(-2)+':'+("0"+m).slice(-2);
+    if(sec==1)
+    {
+      ti=ti+':'+("0"+s).slice(-2);
+    }
     return ti;
   }
 
@@ -25,6 +29,10 @@ $(document).ready(function() {
     $('#mn_today').html(tFormat(diff));
     sum=month_sum+diff;
     $('#mn_remaining').html(tFormat(month_estimated-sum));
+    end_h=now.getHours()*3600*1000;
+    end_m=now.getMinutes()*60*1000;
+    end=end_h+end_m;
+    $('#mn_end').html(tFormat(end+month_estimated-sum,0));
   }
   
   var tab={};
