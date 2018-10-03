@@ -32,6 +32,7 @@ $(document).ready(function() {
   gt=gd.toISOString().substr(0,7);
   $.get("/activities/get-access-events/"+gt,function(data) {
     data=eval(data);
+    $('#content').append("<br /><br />");
     $.each(data,function(index,value) {
       if(!tab[value.u])
       {
@@ -57,7 +58,7 @@ $(document).ready(function() {
       }
       month_estimated=month_estimated+(8*3600*1000);
       month_sum=month_sum+diff;
-      $('#main').append(d+": "+tFormat(diff)+"<br />");
+      $('#content').append(d+": "+tFormat(diff)+"<br />");
     });
     $('#mn_estimated').html(tFormat(month_estimated-(8*3600*1000)));
     $('#mn_sum').html(tFormat(month_sum));
