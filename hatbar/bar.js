@@ -48,6 +48,9 @@ $(document).ready(function() {
       }
       tab[value.u].push(value.det.tm);
     });
+    $.each(data,function(index,value) {
+      tab[value.u].sort();
+    });
     $.each(tab,function(data,arr) {
       start=new Date(arr[0]);
       end=new Date(arr[arr.length-1]);
