@@ -10,6 +10,10 @@ $(document).ready(function() {
 
   function tFormat(t,sec=1)
   {
+    if(t<0)
+    {
+      t=t*(-1);
+    }
     t=t/1000;
     h=parseInt(t/3600,0);
     m=parseInt((t-(h*3600))/60);
@@ -28,7 +32,17 @@ $(document).ready(function() {
     diff=now-today_start;
     $('#mn_today').html(tFormat(diff));
     sum=month_sum+diff;
-    $('#mn_remaining').html(tFormat(month_estimated-sum));
+    remaining=month_estimated-sum;
+    if(remaining<0)
+    {
+      remaining=remaining*(-1);
+      remaining_sign='+';
+    }
+    else
+    {
+      remaining_sign='-';
+    }
+    $('#mn_remaining').html(remaining_sign+tFormat(remaining));
     end_h=now.getHours()*3600*1000;
     end_m=now.getMinutes()*60*1000;
     end=end_h+end_m;
@@ -48,10 +62,8 @@ $(document).ready(function() {
       }
       tab[value.u].push(value.det.tm);
     });
-    $.each(data,function(index,value) {
-      tab[value.u].sort();
-    });
     $.each(tab,function(data,arr) {
+      tab[data].sort();
       start=new Date(arr[0]);
       end=new Date(arr[arr.length-1]);
       d=start.toISOString().replace('-','').replace('-','').substr(0,8);
@@ -74,6 +86,5 @@ $(document).ready(function() {
     $('#mn_estimated').html(tFormat(month_estimated-(8*3600*1000)));
     $('#mn_sum').html(tFormat(month_sum));
   });
-
 
 });
