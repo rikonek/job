@@ -18,7 +18,15 @@ $(document).ready(function() {
     h=parseInt(t/3600,0);
     m=parseInt((t-(h*3600))/60);
     s=parseInt(t-(h*3600)-(m*60));
-    ti=("0"+h).slice(-2)+':'+("0"+m).slice(-2);
+    if(h<10)
+    {
+      ti=("0"+h).slice(-2);
+    }
+    else
+    {
+      ti=h;
+    }
+    ti=ti+':'+("0"+m).slice(-2);
     if(sec==1)
     {
       ti=ti+':'+("0"+s).slice(-2);
