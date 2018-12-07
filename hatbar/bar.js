@@ -1,5 +1,12 @@
 $(document).ready(function() {
 
+  /* config */
+
+    /* Set manual_fix_time if you want add time manual [ms] */
+    var manual_fix_time=(0)*60*1000;
+
+  /* end config */
+
   $('body').prepend('<div style="position: fixed; z-index: 999; top: 0px; border-bottom: 1px solid #cccccc; background-color: yellow; width: 100%; padding: 7px; text-align: center;">Czas pracy: <span id="mn_today"></span>, Koniec: <span id="mn_end"></span> (<span id="mn_remaining"></span>)<br />Do wypracowania: <span id="mn_estimated"></span>, Wypracowane: <span id="mn_sum"></span></div>');
 
   var today_start;
@@ -91,6 +98,7 @@ $(document).ready(function() {
       month_sum=month_sum+diff;
       $('#content').append(d+": "+tFormat(diff)+"<br />");
     });
+    month_sum=month_sum+manual_fix_time;
     $('#mn_estimated').html(tFormat(month_estimated-(8*3600*1000)));
     $('#mn_sum').html(tFormat(month_sum));
   });
