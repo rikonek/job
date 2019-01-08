@@ -3,11 +3,14 @@ $(document).ready(function() {
   /* config */
 
     /* Set manual_fix_time if you want add time manual [ms] */
-    var manual_fix_time=(0)*60*1000;
+    var manual_fix_time=(0)*60*1000
+
+    /* Check lunch for current day */
+    var checkLunch=1;
 
   /* end config */
 
-  $('body').prepend('<div style="position: fixed; z-index: 999; top: 0px; border-bottom: 1px solid #cccccc; background-color: yellow; width: 100%; padding: 7px; text-align: center;">Czas pracy: <span id="mn_today"></span>, Koniec: <span id="mn_end"></span> (<span id="mn_remaining"></span>)<br />Do wypracowania: <span id="mn_estimated"></span>, Wypracowane: <span id="mn_sum"></span></div>');
+  $('body').prepend('<div id="hatbar" style="position: fixed; z-index: 999; top: 0px; border-bottom: 1px solid #cccccc; background-color: yellow; width: 100%; padding: 7px; text-align: center;">Czas pracy: <span id="mn_today"></span>, Koniec: <span id="mn_end"></span> (<span id="mn_remaining"></span>)<br />Do wypracowania: <span id="mn_estimated"></span>, Wypracowane: <span id="mn_sum"></span></div>');
 
   var today_start;
   var month_estimated=0;
@@ -63,7 +66,21 @@ $(document).ready(function() {
     end=end_h+end_m;
     $('#mn_end').html(tFormat(end+month_estimated-sum,0));
   }
-  
+
+  function checkLunchToday()
+  {
+    var order='';
+    $.get("/en/lunches/history",function(data) {
+      order=$('tr.today td:first-child',data).html();
+    });
+    now=new Date();
+    date_now=now.toISOString().substr(0,10);
+    if(date_now==order)
+    {
+      $('#hatbar').css('background-color','red').append('<p><b>Brak obiadu na dzisiaj!</b></p>');
+    }
+  }
+
   var tab={};
   gd=new Date();
   gt=gd.toISOString().substr(0,7);
@@ -102,5 +119,5 @@ $(document).ready(function() {
     $('#mn_estimated').html(tFormat(month_estimated-(8*3600*1000)));
     $('#mn_sum').html(tFormat(month_sum));
   });
-
+  if(checkLunch) checkLunchToday();
 });
