@@ -1,131 +1,201 @@
-$(document).ready(function() {
+// ==UserScript==
+// @name         HatBar
+// @namespace    https://github.com/rikonek/job
+// @version      0.1
+// @description  Work time counter
+// @author       Rikon
+// @match        https://hat.poland.[YOUR_DOMAIN_HERE].com/*
+// @grant        GM_addStyle
+// @require      http://code.jquery.com/jquery-3.3.1.min.js
+// ==/UserScript==
 
-  /* config */
+GM_addStyle(`
+	#hatbar { position: fixed; z-index: 999; top: 0px; border-bottom: 1px solid #cccccc; background-color: yellow; width: 100%; padding: 7px; text-align: center; }
+	#hatbar_synchro { position: absolute; top: 5px; right: 20px; }
+	#hatbar_time_fix { background: #ffffff; border: 1px solid #aaaaaa; width: 150px; font-weight: normal; }
+`);
 
-    /* Set manual_fix_time if you want add time manual [ms] */
-    var manual_fix_time=(0)*60*1000
+function init()
+{
+	addBar();
 
-    /* Check lunch for current day */
-    var check_lunch=1;
+	$('#hatbar_synchro_button').click(function() {
+		hatSummarySynchronization();
+		location.reload();
+	});
+	$('#hatbar_time_fix').change(function() {
+		val=parseInt($(this).val());
+		if(val==0 || !$.isNumeric(val)) val='';
+		set('manual_time_fix',val);
+		location.reload();
+	});
 
-    /* Display meal */
-    var display_meal=1;
+	$('#hatbar_time_fix').val(get('manual_time_fix'));
 
-  /* end config */
+	var now=new Date();
+	getEvents(now.toISOString().substr(0,7));
+	month_sum=month_sum+(get('manual_time_fix')*60*1000);
+}
 
-  $('body').prepend('<div id="hatbar" style="position: fixed; z-index: 999; top: 0px; border-bottom: 1px solid #cccccc; background-color: yellow; width: 100%; padding: 7px; text-align: center;">Czas pracy: <span id="mn_today"></span>, Koniec: <span id="mn_end"></span> (<span id="mn_remaining"></span>)<br />Do wypracowania: <span id="mn_estimated"></span>, Wypracowane: <span id="mn_sum"></span><div id="hatbar_meal" style="position: absolute; top: 5px; left: 5px; width: 400px; font-size: 12px; color: #999999;"></div></div>');
+function set(key,value)
+{
+	localStorage.setItem('hatbar_'+key,value);
+}
 
-  var today_start;
-  var month_estimated=0;
-  var month_sum=0;
-  
-  setInterval(function() { refreshTime(); },500);
+function get(key)
+{
+	return localStorage.getItem('hatbar_'+key);
+}
 
-  function tFormat(t,sec=1)
-  {
-    if(t<0)
-    {
-      t=t*(-1);
-    }
-    t=t/1000;
-    h=parseInt(t/3600,0);
-    m=parseInt((t-(h*3600))/60);
-    s=parseInt(t-(h*3600)-(m*60));
-    if(h<10)
-    {
-      ti=("0"+h).slice(-2);
-    }
-    else
-    {
-      ti=h;
-    }
-    ti=ti+':'+("0"+m).slice(-2);
-    if(sec==1)
-    {
-      ti=ti+':'+("0"+s).slice(-2);
-    }
-    return ti;
-  }
+function addBar()
+{
+	$('body').prepend('<div id="hatbar">Czas pracy: <span id="hatbar_today">00:00:00</span>, Koniec: <span id="hatbar_end">00:00</span> (<span id="hatbar_remaining">00:00:00</span>)<br />Do wypracowania: <span id="hatbar_estimated">00:00:00</span>, Wypracowane: <span id="hatbar_sum">00:00:00</span><div id="hatbar_synchro"><input type="text" id="hatbar_time_fix" placeholder="Korekta czasu [minuty]" /> <button id="hatbar_synchro_button">Synchronizuj</button></div></div>');
+}
 
-  function refreshTime()
-  {
-    now=new Date();
-    diff=now-today_start;
-    $('#mn_today').html(tFormat(diff));
-    sum=month_sum+diff;
-    remaining=month_estimated-sum;
-    if(remaining<0)
-    {
-      remaining=remaining*(-1);
-      remaining_sign='+';
-    }
-    else
-    {
-      remaining_sign='-';
-    }
-    $('#mn_remaining').html(remaining_sign+tFormat(remaining));
-    end_h=now.getHours()*3600*1000;
-    end_m=now.getMinutes()*60*1000;
-    end=end_h+end_m;
-    $('#mn_end').html(tFormat(end+month_estimated-sum,0));
-  }
+function getEvents(date)
+{
+	$.get("/activities/get-access-events/"+date,function(d) {
+		d=eval(d);
+		var tab={};
+		$.each(d,function(index,value) {
+			if(!tab[value.u])
+			{
+				tab[value.u]=[];
+			}
+			tab[value.u].push(value.det.tm);
+		});
+		readTimeFromEvents(tab);
+		refreshConstTime();
+		refreshTime();
+	});
+}
 
-  function checkLunchToday()
-  {
-    $.get("/en/lunches/history",function(data) {
-      order=$('tr.today td:first-child',data).html();
-      meal=$('tr.today td:nth-child(3)',data).html();
+function readTimeFromEvents(tab)
+{
+	$('#content').append("<br /><br />");
+	$.each(tab,function(data,arr) {
+		tab[data].sort();
+		var start=new Date(arr[0]);
+		var end=new Date(arr[arr.length-1]);
+		var d=start.toISOString().replace('-','').replace('-','').substr(0,8);
+		var now=new Date();
+		t=now.toISOString().replace('-','').replace('-','').substr(0,8);
+		diff=0;
+		if(d==t)
+		{
+			today_start=start;
+			end=now;
+		}
+		else
+		{
+			diff=end-start;
+		}
+		month_estimated=month_estimated+(8*3600*1000);
+		month_sum=month_sum+diff;
+		month_events=month_events+diff;
+		$('#content').append(d+": "+tFormat(diff)+"<br />");
+	});
+	month_estimated=month_estimated-(8*3600*1000);
+}
 
-      now=new Date();
-      date_now=now.toISOString().substr(0,10);
-      if(date_now==order)
-      {
-        if(display_meal) $('#hatbar_meal').html(meal);
-      }
-      else
-      {
-        $('#hatbar').css('background-color','red').append('<p><b>Brak obiadu na dzisiaj!</b></p>');
-      }
-    });
-  }
+function tFormat(t,sec=1)
+{
+	if(t<0)
+	{
+		t=t*(-1);
+	}
+	t=t/1000;
+	h=parseInt(t/3600,0);
+	m=parseInt((t-(h*3600))/60);
+	s=parseInt(t-(h*3600)-(m*60));
+	if(h<10)
+	{
+		ti=("0"+h).slice(-2);
+	}
+	else
+	{
+		ti=h;
+	}
+	ti=ti+':'+("0"+m).slice(-2);
+	if(sec==1)
+	{
+		ti=ti+':'+("0"+s).slice(-2);
+	}
+	return ti;
+}
 
-  var tab={};
-  gd=new Date();
-  gt=gd.toISOString().substr(0,7);
-  $.get("/activities/get-access-events/"+gt,function(data) {
-    data=eval(data);
-    $('#content').append("<br /><br />");
-    $.each(data,function(index,value) {
-      if(!tab[value.u])
-      {
-        tab[value.u]=[];
-      }
-      tab[value.u].push(value.det.tm);
-    });
-    $.each(tab,function(data,arr) {
-      tab[data].sort();
-      start=new Date(arr[0]);
-      end=new Date(arr[arr.length-1]);
-      d=start.toISOString().replace('-','').replace('-','').substr(0,8);
-      dn=new Date();
-      t=dn.toISOString().replace('-','').replace('-','').substr(0,8);
-      diff=0;
-      if(d==t)
-      {
-        today_start=start;
-        end=dn;
-      }
-      else
-      {
-        diff=end-start;
-      }
-      month_estimated=month_estimated+(8*3600*1000);
-      month_sum=month_sum+diff;
-      $('#content').append(d+": "+tFormat(diff)+"<br />");
-    });
-    month_sum=month_sum+manual_fix_time;
-    $('#mn_estimated').html(tFormat(month_estimated-(8*3600*1000)));
-    $('#mn_sum').html(tFormat(month_sum));
-  });
-  if(check_lunch) checkLunchToday();
-});
+function getTodayTime()
+{
+	now=new Date();
+	diff=now-today_start;
+	return diff;
+}
+
+function getEndTime()
+{
+	diff=month_sum-month_estimated;
+	start=(today_start.getHours()*3600+today_start.getMinutes()*60+today_start.getSeconds())*1000;
+	end=(8*3600*1000)+start-diff;
+	return end;
+}
+
+function getRemainingTime()
+{
+	currdate=new Date();
+	now=(currdate.getHours()*3600+currdate.getMinutes()*60+currdate.getSeconds())*1000;
+	remaining=getEndTime()-now;
+	if(remaining<0)
+	{
+		remaining=remaining*(-1);
+		remaining_sign='+';
+	}
+	else
+	{
+		remaining_sign='-';
+	}
+	return remaining_sign+tFormat(remaining);
+}
+
+function refreshConstTime()
+{
+	$('#hatbar_end').html(tFormat(getEndTime(),0));
+	$('#hatbar_estimated').html(tFormat(month_estimated));
+	$('#hatbar_sum').html(tFormat(month_sum));
+}
+
+function refreshTime()
+{
+	$('#hatbar_today').html(tFormat(getTodayTime()));
+	$('#hatbar_remaining').html(getRemainingTime());
+}
+
+function parseTime(str)
+{
+	var s=str.split(':');
+	return (s[0]*3600+s[1]*60+s[2]*1)*1000;
+}
+
+function hatSummarySynchronization()
+{
+	time_div=$('div.m span');
+	time=[];
+	$.each(time_div,function(index,value) {
+		time.push(value.innerHTML.replace(/\s+\(.*\)/,''));
+	});
+	total_counted=parseTime(time[0])+parseTime(time[2]);
+	diff=total_counted-month_estimated;
+	diff_events=month_events-month_estimated;
+	set('manual_time_fix',parseInt((diff-diff_events)/60/1000));
+}
+
+var today_start;
+var month_estimated=0;
+var month_sum=0;
+var month_events=0;
+
+(function() {
+	'use strict';
+
+	init();
+	setInterval(function() { refreshTime(); },1000);
+})();
