@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HatBar
 // @namespace    https://github.com/rikonek/job
-// @version      0.1
+// @version      0.2
 // @description  Work time counter
 // @author       Rikon
 // @match        https://hat.poland.[YOUR_DOMAIN_HERE].com/*
@@ -24,9 +24,7 @@ function init()
 		location.reload();
 	});
 	$('#hatbar_time_fix').change(function() {
-		val=parseInt($(this).val());
-		if(val==0 || !$.isNumeric(val)) val='';
-		set('manual_time_fix',val);
+		setTimeFix($(this).val());
 		location.reload();
 	});
 
@@ -185,7 +183,14 @@ function hatSummarySynchronization()
 	total_counted=parseTime(time[0])+parseTime(time[2]);
 	diff=total_counted-month_estimated;
 	diff_events=month_events-month_estimated;
-	set('manual_time_fix',parseInt((diff-diff_events)/60/1000));
+	setTimeFix(parseInt((diff-diff_events)/60/1000));
+}
+
+function setTimeFix(value)
+{
+	val=parseInt(value);
+	if(val==0 || !$.isNumeric(val)) val='';
+	set('manual_time_fix',val);
 }
 
 var today_start;
