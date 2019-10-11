@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HatBar
 // @namespace    https://github.com/rikonek/job
-// @version      0.2
+// @version      0.3
 // @description  Work time counter
 // @author       Rikon
 // @match        https://hat.poland.[YOUR_DOMAIN_HERE].com/*
@@ -19,10 +19,6 @@ function init()
 {
 	addBar();
 
-	$('#hatbar_synchro_button').click(function() {
-		hatSummarySynchronization();
-		location.reload();
-	});
 	$('#hatbar_time_fix').change(function() {
 		setTimeFix($(this).val());
 		location.reload();
@@ -30,9 +26,7 @@ function init()
 
 	$('#hatbar_time_fix').val(get('manual_time_fix'));
 
-	var now=new Date();
-	getEvents(now.toISOString().substr(0,7));
-	month_sum=month_sum+(get('manual_time_fix')*60*1000);
+	getWorkTime();
 }
 
 function set(key,value)
@@ -47,7 +41,7 @@ function get(key)
 
 function addBar()
 {
-	$('body').prepend('<div id="hatbar">Czas pracy: <span id="hatbar_today">00:00:00</span>, Koniec: <span id="hatbar_end">00:00</span> (<span id="hatbar_remaining">00:00:00</span>)<br />Do wypracowania: <span id="hatbar_estimated">00:00:00</span>, Wypracowane: <span id="hatbar_sum">00:00:00</span><div id="hatbar_synchro"><input type="text" id="hatbar_time_fix" placeholder="Korekta czasu [minuty]" /> <button id="hatbar_synchro_button">Synchronizuj</button></div></div>');
+	$('body').prepend('<div id="hatbar">Czas pracy: <span id="hatbar_today">00:00:00</span>, Koniec: <span id="hatbar_end">00:00</span> (<span id="hatbar_remaining">00:00:00</span>)<br />Do wypracowania: <span id="hatbar_estimated">00:00:00</span>, Wypracowane: <span id="hatbar_sum">00:00:00</span><div id="hatbar_synchro"><input type="text" id="hatbar_time_fix" placeholder="Korekta czasu [minuty]" /></div></div>');
 }
 
 function getEvents(date)
@@ -63,7 +57,6 @@ function getEvents(date)
 			tab[value.u].push(value.det.tm);
 		});
 		readTimeFromEvents(tab);
-		refreshConstTime();
 		refreshTime();
 	});
 }
@@ -78,22 +71,32 @@ function readTimeFromEvents(tab)
 		var d=start.toISOString().replace('-','').replace('-','').substr(0,8);
 		var now=new Date();
 		t=now.toISOString().replace('-','').replace('-','').substr(0,8);
-		diff=0;
 		if(d==t)
 		{
 			today_start=start;
 			end=now;
 		}
+	});
+}
+
+function getWorkTime()
+{
+	var now=new Date();
+	now=now.toISOString().substr(0,10);
+	var time_div=$('div.s');
+	$.each(time_div,function(index,value) {
+		if($(this).attr('id')==now)
+		{
+			getEvents(now.substr(0,7));
+		}
 		else
 		{
-			diff=end-start;
+			month_estimated+=parseInt($(this).attr('norm'))*3600*1000;
+			month_sum+=parseInt($(this).attr('sum'))*1000;
 		}
-		month_estimated=month_estimated+(8*3600*1000);
-		month_sum=month_sum+diff;
-		month_events=month_events+diff;
-		$('#content').append(d+": "+tFormat(diff)+"<br />");
 	});
-	month_estimated=month_estimated-(8*3600*1000);
+	month_sum+=get('manual_time_fix')*60*1000;
+	refreshConstTime();
 }
 
 function tFormat(t,sec=1)
@@ -156,34 +159,22 @@ function getRemainingTime()
 
 function refreshConstTime()
 {
-	$('#hatbar_end').html(tFormat(getEndTime(),0));
 	$('#hatbar_estimated').html(tFormat(month_estimated));
 	$('#hatbar_sum').html(tFormat(month_sum));
 }
 
 function refreshTime()
 {
+	if(!today_start) return false;
 	$('#hatbar_today').html(tFormat(getTodayTime()));
 	$('#hatbar_remaining').html(getRemainingTime());
+	$('#hatbar_end').html(tFormat(getEndTime(),0));
 }
 
 function parseTime(str)
 {
 	var s=str.split(':');
 	return (s[0]*3600+s[1]*60+s[2]*1)*1000;
-}
-
-function hatSummarySynchronization()
-{
-	time_div=$('div.m span');
-	time=[];
-	$.each(time_div,function(index,value) {
-		time.push(value.innerHTML.replace(/\s+\(.*\)/,''));
-	});
-	total_counted=parseTime(time[0])+parseTime(time[2]);
-	diff=total_counted-month_estimated;
-	diff_events=month_events-month_estimated;
-	setTimeFix(parseInt((diff-diff_events)/60/1000));
 }
 
 function setTimeFix(value)
@@ -196,7 +187,6 @@ function setTimeFix(value)
 var today_start;
 var month_estimated=0;
 var month_sum=0;
-var month_events=0;
 
 (function() {
 	'use strict';
